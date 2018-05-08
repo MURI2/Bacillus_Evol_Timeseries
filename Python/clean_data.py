@@ -1,17 +1,20 @@
 from __future__ import division
-import os
+import os, subprocess, re
 import numpy as np
+import pandas as pd
 from Bio import SeqIO
 import bacillus_tools as bt
 
-mydir = os.path.expanduser("~/GitHub/Bacillus_Evol_Timeseries")
 
+####
+# add line to check whethe a gene is annotated as spore-related or not
+####
 
 def clean_GBK():
-    IN_path = mydir + '/data/Bacillus_subtilis_NCIB_3610/GCA_002055965.1_ASM205596v1_genomic.gbff'
+    IN_path = bt.get_path() + '/data/Bacillus_subtilis_NCIB_3610/GCA_002055965.1_ASM205596v1_genomic.gbff'
     genome = SeqIO.parse(IN_path, "genbank")
     # protein_id
-    df_out = open(mydir + '/data/gene_table.txt', 'w')
+    df_out = open(bt.get_path() + '/data/gene_table.txt', 'w')
     header = ['LocusTag', 'protein_id' , 'Gene', 'Type', 'Size', 'GC', 'Sequence', 'Fold_1', \
             'Fold_2', 'Fold_2_S', 'Fold_2_V', 'Fold_3', 'Fold_4', 'N', 'S']
     df_out.write('\t'.join(header) + '\n')
@@ -32,6 +35,7 @@ def clean_GBK():
         else:
             chrom = 'Genome'
         for f in record.features:
+            #print(f)
             total.append(f)
             if f.type not in types_keep:
                 continue
@@ -108,48 +112,68 @@ def clean_GBK():
                 # fold_2_S and fold_2_V calculated using Comeron, 1995
                 out_line = [locus_tag, protein_id, gene, f.type, size, GC, chrom, fold_1, fold_2, \
                         fold_2_S, fold_2_V, fold_3, fold_4, N, S]
-                #out_line = [str(x) for x in out_line]
-
             else:
                 out_line = [locus_tag, protein_id, gene, f.type, size, GC, chrom, 'nan', 'nan', \
                         'nan', 'nan', 'nan', 'nan', 'nan', 'nan']
-                #out_line = [str(x) for x in out_line]
-            print(locus_tag)
+            #print(locus_tag)
             df_out.write('\t'.join([str(x) for x in out_line]) + '\n')
-
-
     df_out.close()
+
+
+def get_iRep():
+    directory = os.fsencode(bt.get_path() + '/data/pool_pop_seq/rebreseq_sam')
+    fasta = bt.get_path() + '/data/reference.fasta'
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith('-300.sam'):
+            print(filename)
+            out_file = bt.get_path() + '/data/bPTR/' + filename.split('.')[0]
+            sam = os.path.join(str(directory, 'utf-8'), filename)
+            #plot = bt.get_path() + '/data/bPTR/' + filename.split('.')[0]
+            #subprocess.call(['irep', '-f', fasta, '-s', sam, '-o', out_file, '--sort'])
+            subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '--sort', '-plot', out_file])
+
 
 
 def get_pop_by_gene_matrix():
     # just bother with day 100 for now
+    to_exclude = bt.mutations_to_exclude()
     gene_pop_matrix = {}
-    to_keep = ['SNP', 'INS', 'DEL']
-    directory = os.fsencode(mydir + '/data/pool_pop_seq/rebreseq_annotated')
+    directory = os.fsencode(bt.get_path() + '/data/pool_pop_seq/rebreseq_annotated')
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
         if filename.endswith('-100.gd'):
             in_df = open(os.path.join(str(directory, 'utf-8'), filename), 'r')
+            pop = filename.split('.')[0]
             for line in in_df:
                 line_split = line.strip().split()
-                if line_split[0] not in to_keep:
+                if (line_split[0] not in bt.get_to_keep()) or \
+                    (line_split[8].split('=')[1] == 'intergenic') or \
+                    (line_split[3] + '_' + line_split[4] in to_exclude):
                     continue
-                #print(line_split)
-                if line_split[8].split('=')[1] == 'intergenic':
-                    continue
-                # choose by locus_tag
-                #print(line_split)
-                #print(line_split[10])
-                locus_tag_list = [s for s in line_split if 'locus_tag=' in s]
+                # clean locus tags
+                locus_tag = [s for s in line_split if 'locus_tag=' in s][0].split('=')[1]
+                locus_tag_clean = re.sub('[][]', '', locus_tag)#.split(';')
+                locus_tag_clean_split = re.findall(r"[\w']+", locus_tag_clean)
+                for locus in locus_tag_clean_split:
+                    if locus in gene_pop_matrix:
+                        if pop in gene_pop_matrix[locus]:
+                            gene_pop_matrix[locus][pop] += 1
+                        else:
+                            gene_pop_matrix[locus][pop] = 1
+                    else:
+                        gene_pop_matrix[locus] = {}
+                        gene_pop_matrix[locus][pop] = 1
 
-                #gene_name =
-                #print(line_split)
-                #gene_name = line_split[]
-            #print(type(directory))
-            #print(str(directory, 'utf-8'))
-            #print(type())
-            #print(bfilename.decode("utf-8") )
-            #in_df =
+    df = pd.DataFrame.from_dict(gene_pop_matrix)
+    df = df.fillna(0)
+    df_out = bt.get_path() + '/data/pool_pop_seq/gene_by_pop.txt'
+    df.to_csv(df_out, sep = '\t', index = True)
+
+
+
+
 
 #clean_GBK()
 get_pop_by_gene_matrix()
+#get_iRep()

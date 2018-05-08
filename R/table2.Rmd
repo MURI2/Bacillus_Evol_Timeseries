@@ -1,0 +1,27 @@
+---
+output: pdf_document
+---
+
+|$$\mathbf{Taxon}$$|$$\mathbf{Day}$$|$$\mathbf{Treatment}$$|$$\mathbf{Gene}$$|$$\boldsymbol{p\mbox{-}value}$$|
+|-----------------|:--------------------:|:----------------:|:----------------------------:|--------:|
+|$$\boldsymbol{Bacillus}$$ | $$\mathbf{100}$$  |  $$\mathbf{1\mbox{-}day}$$   |     $$\boldsymbol{sufC}$$  |  $$0.049$$ |
+|  | $$\mathbf{200}$$  |  $$\mathbf{10\mbox{-}day}$$   |     $$\boldsymbol{ptsI}$$  |  $$0.0089$$ |
+|  | $$\mathbf{300}$$  |  $$\mathbf{1\mbox{-}day}$$   |     $$\boldsymbol{sufC}$$  |  $$0.012$$ |
+|  | $$\mathbf{300}$$  |  $$\mathbf{1\mbox{-}day}$$   |     $$\boldsymbol{pksL}$$  |  $$0.032$$ |
+|  | $$\mathbf{300}$$  |  $$\mathbf{10\mbox{-}day}$$   |     $$\boldsymbol{ptsI}$$  |  $$0.015$$ |
+|$$\boldsymbol{Bacillus\, \Delta spoA}$$ | $$\mathbf{100}$$  |  $$\mathbf{10\mbox{-}day}$$   |     $$\boldsymbol{cspB}$$  |  $$0.014$$ |
+|  | $$\mathbf{100}$$  |  $$\mathbf{10\mbox{-}day}$$   |     $$\boldsymbol{ptsI}$$  |  $$0.018$$ |
+|  | $$\mathbf{100}$$  |  $$\mathbf{100\mbox{-}day}$$   |     $$\boldsymbol{sufC}$$  |  $$0.002$$ |
+|   $$\boldsymbol{Deinococcus}$$  | $$\mathbf{200}$$  |    $$\mathbf{100\mbox{-}day}$$      |   $$\boldsymbol{pfkB}$$  |$$ 0.011$$  |
+|   $$\boldsymbol{Pedobacter}$$  | $$\mathbf{200}$$  |    $$\mathbf{1\, and \, 10\mbox{-}day}$$  |   $$\boldsymbol{hyp.\, protein}$$  |$$ 0.019$$  |
+|    | $$\mathbf{200}$$  |    $$\mathbf{10\, and \, 100\mbox{-}day}$$  |   $$\boldsymbol{hyp.\, protein}$$  |$$ 0.033$$  |
+|   $$\boldsymbol{Janthinobacterium}$$  | $$\mathbf{100}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{trpGD}$$  |$$0.00899$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{rpoA}$$  |$$0.036$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{purF}$$  |$$0.036$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{purM}$$  |$$0.036$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{puuA}$$  |$$0.043$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{sensor \,protein}$$  |$$0.036$$  |
+|   $$\boldsymbol{Pseudomonas}$$  | $$\mathbf{100}$$  |    $$\mathbf{1\mbox{-}day}$$  |   $$\boldsymbol{ntrC}$$  |$$0.000999$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{1\mbox{-}day}$$  |   $$\boldsymbol{phoU}$$  |$$0.015$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{1\mbox{-}day}$$  |   $$\boldsymbol{adhB}$$  |$$0.042$$  |
+|    | $$\mathbf{300}$$  |    $$\mathbf{10\mbox{-}day}$$  |   $$\boldsymbol{arcD}$$  |$$0.045$$  |

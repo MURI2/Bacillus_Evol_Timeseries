@@ -1,0 +1,332 @@
+---
+title: "Bacillus dispersion"
+author: "William R. Shoemaker, Jay T. Lennon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/Task2/PoolPopSeq")
+
+# Load dependencies
+require("vegan")
+require("png")
+require("grid")
+library("scales")
+
+# Source code functions
+source("R/ParEvol.R")
+```
+
+
+import data
+
+```{r}
+# pop-by-gene matrix
+pop_by_gene <- c("data/gene_by_sample/B_S/sample_by_gene.txt")
+df <- read.table(paste(pop_by_gene, collapse = ''), sep = "\t", header = TRUE, row.names = 1)
+# select samples only from day 100
+df <- df[grep('D100', rownames(df)), ]
+# remove intergenic regions (if they're there)
+df.noInter <- df[,!grepl('.B', colnames(df))]
+
+# gene info dataframe
+gene_path <- c("data/reference_assemblies_task2/reference_assemblies_task2_table/B.txt")
+df.gene <- read.table(paste(gene_path, collapse = ''), sep = " ", header = TRUE, row.names = 1)
+L <- sum(df.gene$Size)
+df.gene$RelSize <- df.gene$Size / L
+# sort df.gene according to column order in df
+df.RelSize <- df.gene[c('RelSize', 'Size')]
+
+df.merge <- merge(df.RelSize, t(df.noInter), by=0, all=TRUE)
+rownames(df.merge) <- df.merge$Row.names
+pmf <- df.merge$RelSize
+sizes <- df.merge$Size
+df.merge <- subset(df.merge, select = -c(Row.names, RelSize, Size) )
+df.merge <- t(df.merge)
+pop.muts <- rowSums(df.merge)
+```
+
+
+Get mean centroid distance using G-score matrix
+
+```{r}
+df.G <- make.G.matrix(df.merge, pmf)
+df.G <- df.G[rowSums(df.G[,-1]) != 0,]
+df.G <- df.G[, colSums(df.G != 0) > 0]
+df.G.db <- vegdist(df.G, method = "bray", upper = TRUE, diag = TRUE)
+df.G.groups <- substr(c(sapply(strsplit(rownames(df.G),"_"), `[`, 2)), 1, 3)
+beta.disp.G <- betadisper(d = df.G.db, group = df.G.groups)
+euc.mat.G <- get.euc.dist.2D(beta.disp.G)
+euc.mean.G <- aggregate(eucs ~ treat.strain.names, euc.mat.G, FUN = function(x) mean(as.numeric(as.character(x))))
+euc.var.G <- aggregate(eucs ~ treat.strain.names, euc.mat.G, FUN = function(x) var(as.numeric(as.character(x))))
+
+rownames(euc.mean.G) <- euc.mean.G[,1]
+euc.mean.G <- data.frame(euc.mean.G)
+```
+
+
+
+Get mean centroid distance values from random G-score matrices
+
+```{r}
+# call function with 1,000 iterations
+df.null.euc.G <- sim.euc.dist.G(df.merge, pop.muts, pmf, df.G.groups, 1000)
+# standardize mean centroid distances
+df.null.euc.G.z <- scale(df.null.euc.G, center = TRUE, scale = TRUE)
+df.null.euc.G.z.df <- data.frame(df.null.euc.G.z)
+df.null.euc.G.z.u <- attr(df.null.euc.G.z, 'scaled:center')
+df.null.euc.G.z.sd <- attr(df.null.euc.G.z, 'scaled:scal')
+
+df.null.euc.G.z.u.mat <- data.frame(df.null.euc.G.z.u)
+df.null.euc.G.z.sd.mat <- data.frame(df.null.euc.G.z.sd)
+names(df.null.euc.G.z.u.mat)[1] <- "mean"
+names(df.null.euc.G.z.sd.mat)[1] <- "sd"
+euc.G.z.mat <- merge(df.null.euc.G.z.u.mat, df.null.euc.G.z.sd.mat, by=0, all=TRUE)
+rownames(euc.G.z.mat) <- euc.mean.G[,1]
+
+# get 95% CIs from permutation results
+# 1,000 * 0.025 = 25
+LCI.G <- c(sort(df.null.euc.G.z.df$L0B)[25], sort(df.null.euc.G.z.df$L0S)[25],
+        sort(df.null.euc.G.z.df$L1B)[25], sort(df.null.euc.G.z.df$L1S)[25],
+        sort(df.null.euc.G.z.df$L2B)[25], sort(df.null.euc.G.z.df$L2S)[25])
+df.null.euc.G.z.u.mat["LCI"] <- LCI.G
+UCI.G <- c(sort(df.null.euc.G.z.df$L0B)[1000-25], sort(df.null.euc.G.z.df$L0S)[1000-25],
+        sort(df.null.euc.G.z.df$L1B)[1000-25], sort(df.null.euc.G.z.df$L1S)[1000-25],
+        sort(df.null.euc.G.z.df$L2B)[1000-25], sort(df.null.euc.G.z.df$L2S)[1000-25])
+df.null.euc.G.z.u.mat["UCI"] <- UCI.G
+
+Bdisp.L0B.G <- (euc.mean.G['L0B', 'eucs'] - euc.G.z.mat['L0B', 'mean']) / euc.G.z.mat['L0B', 'sd']
+Bdisp.L0S.G <- (euc.mean.G['L0S', 'eucs'] - euc.G.z.mat['L0S', 'mean']) / euc.G.z.mat['L0S', 'sd']
+Bdisp.L1B.G <- (euc.mean.G['L1B', 'eucs'] - euc.G.z.mat['L1B', 'mean']) / euc.G.z.mat['L1B', 'sd']
+Bdisp.L1S.G <- (euc.mean.G['L1S', 'eucs'] - euc.G.z.mat['L1S', 'mean']) / euc.G.z.mat['L1S', 'sd']
+Bdisp.L2B.G <- (euc.mean.G['L2B', 'eucs'] - euc.G.z.mat['L2B', 'mean']) / euc.G.z.mat['L1B', 'sd']
+Bdisp.L2S.G <- (euc.mean.G['L2S', 'eucs'] - euc.G.z.mat['L2S', 'mean']) / euc.G.z.mat['L1S', 'sd']
+Bdisp.G <- c(Bdisp.L0B.G, Bdisp.L0S.G, Bdisp.L1B.G, Bdisp.L1S.G, Bdisp.L2B.G, Bdisp.L2S.G)
+```
+
+
+Plot data
+
+Figure code based off of code written by Mario Muscarella for his relicDNA project. 
+
+```{r}
+#col2rgb("lightgrey")
+col <- rgb(211,211,211,30,maxColorValue=255)
+bg <- rgb(211,211,211,20,maxColorValue=255)
+
+png(filename = paste(c("figs/beta-disper-G.png"), collapse = ''),
+    width = 1200, height = 1200, res = 96*2)
+
+par(mar = c(6, 5, 1, 1))
+
+plot.G <- plot(1, Bdisp.G[1], 
+      ylim = c(-3.1, 3.1), xlim = c(0.5, 6.5), pch = 19, col = '#87CEEB', bg = 'gray', lwd = 3,
+      cex = 1.7, yaxt = "n", xaxt = "n", cex.lab = 2, cex.axis = 1.5,
+      las = 1, ylab = "", xlab = "")
+      box(lwd = 2)
+points(2,  Bdisp.G[2], pch = 1, bg = "gray", col = "#87CEEB", lwd = 3, cex = 1.7)
+points(3,  Bdisp.G[3], pch = 19, bg = "gray", col = "#FFA500", lwd = 3, cex = 1.7)
+points(4,  Bdisp.G[4], pch = 1, bg = "gray", col = "#FFA500", lwd = 3, cex = 1.7)
+points(5,  Bdisp.G[5], pch = 19, bg = "gray", col = "#FF6347", lwd = 3, cex = 1.7)
+points(6,  Bdisp.G[6], pch = 1, bg = "gray", col = "#FF6347", lwd = 3, cex = 1.7)
+
+
+points(1, df.null.euc.G.z.u.mat[1,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(2, df.null.euc.G.z.u.mat[2,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5)  
+points(3, df.null.euc.G.z.u.mat[3,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(4, df.null.euc.G.z.u.mat[4,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(5, df.null.euc.G.z.u.mat[5,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5)
+points(6, df.null.euc.G.z.u.mat[6,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+      
+box(lwd = 2)
+
+mtext(expression('Standardized mean centroid distance'), side = 2,
+      outer = FALSE, cex = 1.5, line = 3.6, adj = 0.5)
+
+# Major Axes
+axis(side = 2, lwd.ticks = 2, cex.axis = 1.25, las = 1,
+     labels = c("-3.0", "-2.0", "-1.0", "0.0", "1.0", "2.0", "3.0"), at = c(-3, -2, -1, 0, 1, 2, 3))
+
+axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+     at=c(-3, -2, -1, 0, 1, 2, 3), labels = F, tck = -0.02)
+
+axis(side = 1, lwd.ticks = 2, cex.axis = 0.9, las = 1,
+     labels = c("B 1", "S 1", "B 10", "S 10", "B 100", "S 100"), at = c(1, 2, 3, 4, 5, 6))
+
+axis(side = 3, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+     at = c(1, 2, 3, 4, 5, 6), labels = F, tck = -0.02)
+
+
+arrows(x0 = c(1,2,3,4,5,6), y0 = df.null.euc.G.z.u.mat$mean, y1 = df.null.euc.G.z.u.mat$LCI, angle = 90, length = 0.1, lwd = 2)
+arrows(x0 = c(1,2,3,4,5,6), y0 = df.null.euc.G.z.u.mat$mean, y1 = df.null.euc.G.z.u.mat$UCI, angle = 90, length=0.1, lwd = 2)
+
+      
+# Close Plot Device
+dev.off()
+graphics.off()
+
+# Show Plot
+img <- readPNG(paste(c("figs/beta-disper-G.png"), collapse = ''))
+grid.raster(img)
+```
+
+
+
+
+
+
+
+
+
+
+### Now perform same analysis using multplicity (m) scores
+
+
+Get mean centroid distance using m-score matrix
+
+```{r}
+df.m <- make.m.matrix(df.merge, sizes)
+df.m <- df.m[rowSums(df.m[,-1]) != 0,]
+df.m <- df.m[, colSums(df.m != 0) > 0]
+df.m.db <- vegdist(df.m, method = "bray", upper = TRUE, diag = TRUE)
+df.m.groups <- substr(c(sapply(strsplit(rownames(df.m),"_"), `[`, 2)), 1, 3)
+beta.disp.m <- betadisper(d = df.m.db, group = df.m.groups)
+euc.mat.m <- get.euc.dist.2D(beta.disp.m)
+euc.mean.m <- aggregate(eucs ~ treat.strain.names, euc.mat.m, FUN = function(x) mean(as.numeric(as.character(x))))
+euc.var.m <- aggregate(eucs ~ treat.strain.names, euc.mat.m, FUN = function(x) var(as.numeric(as.character(x))))
+
+rownames(euc.mean.m) <- euc.mean.m[,1]
+euc.mean.m <- data.frame(euc.mean.m)
+
+```
+
+
+Get mean centroid distance values from random M-score matrices
+
+```{r}
+# call function with 10,000 iterations
+iters <- 1000
+df.null.euc.m <- sim.euc.dist.m(df.merge, pop.muts, sizes, df.m.groups, iters)
+# standardize mean centroid distances
+df.null.euc.m.z <- scale(df.null.euc.m, center = TRUE, scale = TRUE)
+df.null.euc.m.z.df <- data.frame(df.null.euc.m.z)
+#df.null.euc.m.z.u <- attr(df.null.euc.m.z, 'scaled:center')
+#df.null.euc.m.z.sd <- attr(df.null.euc.m.z, 'scaled:scal')
+df.null.euc.m.z.sd <- apply(df.null.euc.m, 2, sd)
+df.null.euc.m.z.u <- colMeans(df.null.euc.m)
+
+df.null.euc.m.z.u.mat <- data.frame(df.null.euc.m.z.u)
+df.null.euc.m.z.sd.mat <- data.frame(df.null.euc.m.z.sd)
+names(df.null.euc.m.z.u.mat)[1] <- "mean"
+names(df.null.euc.m.z.sd.mat)[1] <- "sd"
+euc.m.z.mat <- merge(df.null.euc.m.z.u.mat, df.null.euc.m.z.sd.mat, by=0, all=TRUE)
+#euc.m.z.mat <- df.null.euc.m.z.u.mat
+rownames(euc.m.z.mat) <- euc.mean.m[,1]
+
+# get 95% CIs from permutation results
+# 1,000 * 0.025 = 25
+LCI.cutOff <- iters * 0.025
+UCI.cutOff <- iters - (iters * 0.025)
+LCI.m <- c(sort(df.null.euc.m.z.df$L0B)[LCI.cutOff], sort(df.null.euc.m.z.df$L0S)[LCI.cutOff],
+        sort(df.null.euc.m.z.df$L1B)[LCI.cutOff], sort(df.null.euc.m.z.df$L1S)[LCI.cutOff],
+        sort(df.null.euc.m.z.df$L2B)[LCI.cutOff], sort(df.null.euc.m.z.df$L2S)[LCI.cutOff])
+df.null.euc.m.z.u.mat["LCI"] <- LCI.m
+UCI.m <- c(sort(df.null.euc.m.z.df$L0B)[UCI.cutOff], sort(df.null.euc.m.z.df$L0S)[UCI.cutOff],
+        sort(df.null.euc.m.z.df$L1B)[UCI.cutOff], sort(df.null.euc.m.z.df$L1S)[UCI.cutOff],
+        sort(df.null.euc.m.z.df$L2B)[UCI.cutOff], sort(df.null.euc.m.z.df$L2S)[UCI.cutOff])
+df.null.euc.m.z.u.mat["UCI"] <- UCI.m
+
+Bdisp.L0B.m <- (euc.mean.m['L0B', 'eucs'] - euc.m.z.mat['L0B', 'mean']) / euc.m.z.mat['L0B', 'sd']
+Bdisp.L0S.m <- (euc.mean.m['L0S', 'eucs'] - euc.m.z.mat['L0S', 'mean']) / euc.m.z.mat['L0S', 'sd']
+Bdisp.L1B.m <- (euc.mean.m['L1B', 'eucs'] - euc.m.z.mat['L1B', 'mean']) / euc.m.z.mat['L1B', 'sd']
+Bdisp.L1S.m <- (euc.mean.m['L1S', 'eucs'] - euc.m.z.mat['L1S', 'mean']) / euc.m.z.mat['L1S', 'sd']
+Bdisp.L2B.m <- (euc.mean.m['L2B', 'eucs'] - euc.m.z.mat['L2B', 'mean']) / euc.m.z.mat['L1B', 'sd']
+Bdisp.L2S.m <- (euc.mean.m['L2S', 'eucs'] - euc.m.z.mat['L2S', 'mean']) / euc.m.z.mat['L1S', 'sd']
+Bdisp.m <- c(Bdisp.L0B.m, Bdisp.L0S.m, Bdisp.L1B.m, Bdisp.L1S.m, Bdisp.L2B.m, Bdisp.L2S.m)
+```
+
+
+Make M-matrix figure
+```{r}
+png(filename = paste(c("figs/beta-disper-m-all.png"), collapse = ''),
+    width = 1200, height = 1200, res = 96*2)
+
+par(mar = c(6, 5, 1, 1))
+
+plot.m <- plot(1, Bdisp.m[1], 
+      ylim = c(-3.1, 3.1), xlim = c(0.5, 6.5), pch = 19, col = '#87CEEB', bg = 'gray', lwd = 3,
+      cex = 1.7, yaxt = "n", xaxt = "n", cex.lab = 2, cex.axis = 1.5,
+      las = 1, ylab = "", xlab = "")
+      box(lwd = 2)
+points(2,  Bdisp.m[2], pch = 1, bg = "gray", col = "#87CEEB", lwd = 3, cex = 1.7)
+points(3,  Bdisp.m[3], pch = 19, bg = "gray", col = "#FFA500", lwd = 3, cex = 1.7)
+points(4,  Bdisp.m[4], pch = 1, bg = "gray", col = "#FFA500", lwd = 3, cex = 1.7)
+points(5,  Bdisp.m[5], pch = 19, bg = "gray", col = "#FF6347", lwd = 3, cex = 1.7)
+points(6,  Bdisp.m[6], pch = 1, bg = "gray", col = "#FF6347", lwd = 3, cex = 1.7)
+
+
+points(1, df.null.euc.m.z.u.mat[1,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(2, df.null.euc.m.z.u.mat[2,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5)  
+points(3, df.null.euc.m.z.u.mat[3,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(4, df.null.euc.m.z.u.mat[4,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+points(5, df.null.euc.m.z.u.mat[5,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5)
+points(6, df.null.euc.m.z.u.mat[6,1], pch = 21, col = "black", 
+       bg = "NA", lwd = 2, cex = 2.5) 
+      
+box(lwd = 2)
+mtext(expression('     1-Day            10-Day         100-Day'), side = 1,
+      outer = FALSE, cex = 1.5, line = 3.6, adj = 0.5)
+
+mtext(expression('Standardized mean centroid distance'), side = 2,
+      outer = FALSE, cex = 1.5, line = 3.6, adj = 0.5)
+
+# Major Axes
+axis(side = 2, lwd.ticks = 2, cex.axis = 1.25, las = 1,
+     labels = c("-3.0", "-2.0", "-1.0", "0.0", "1.0", "2.0", "3.0"), at = c(-3, -2, -1, 0, 1, 2, 3))
+
+axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+     at=c(-3, -2, -1, 0, 1, 2, 3), labels = F, tck = -0.02)
+
+axis(side = 1, lwd.ticks = 2, cex.axis = 0.9, las = 1,
+     labels = c("wt", "spo0A", "wt", "spo0A", "wt", "spo0A"), at = c(1, 2, 3, 4, 5, 6))
+
+axis(side = 3, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+     at = c(1, 2, 3, 4, 5, 6), labels = F, tck = -0.02)
+
+
+arrows(x0 = c(1,2,3,4,5,6), y0 = df.null.euc.m.z.u.mat$mean, y1 = df.null.euc.m.z.u.mat$LCI, angle = 90, length = 0.1, lwd = 2)
+arrows(x0 = c(1,2,3,4,5,6), y0 = df.null.euc.m.z.u.mat$mean, y1 = df.null.euc.m.z.u.mat$UCI, angle = 90, length=0.1, lwd = 2)
+
+      
+# Close Plot Device
+dev.off()
+graphics.off()
+
+# Show Plot
+img <- readPNG(paste(c("figs/beta-disper-m-all.png"), collapse = ''))
+grid.raster(img)
+```
+
+
+
+
