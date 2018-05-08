@@ -1,0 +1,28 @@
+# Assembly name:  ASM205596v1
+# Organism name:  Bacillus subtilis (firmicutes)
+# Infraspecific name:  strain=NCIB 3610
+# Taxid:          1423
+# BioSample:      SAMN06472805
+# BioProject:     PRJNA377766
+# Submitter:      University of Michigan, Ann Arbor
+# Date:           2017-3-21
+# Assembly type:  n/a
+# Release type:   major
+# Assembly level: Complete Genome
+# Genome representation: full
+# GenBank assembly accession: GCA_002055965.1
+# RefSeq assembly accession: GCF_002055965.1
+# RefSeq assembly and GenBank assemblies identical: yes
+#
+## Assembly-Units:
+## GenBank Unit Accession	RefSeq Unit Accession	Assembly-Unit name
+## GCA_002055985.1	GCF_002055985.1	Primary Assembly
+#
+# Ordered by chromosome/plasmid; the chromosomes/plasmids are followed by
+# unlocalized scaffolds.
+# Unplaced scaffolds are listed at the end.
+# RefSeq is equal or derived from GenBank object.
+#
+# Sequence-Name	Sequence-Role	Assigned-Molecule	Assigned-Molecule-Location/Type	GenBank-Accn	Relationship	RefSeq-Accn	Assembly-Unit	Sequence-Length	UCSC-style-name
+ANONYMOUS	assembled-molecule	na	Chromosome	CP020102.1	=	NZ_CP020102.1	Primary Assembly	4215607	na
+pBS32	assembled-molecule	pBS32	Plasmid	CP020103.1	=	NZ_CP020103.1	Primary Assembly	84215	na

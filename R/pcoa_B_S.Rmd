@@ -1,0 +1,197 @@
+---
+title: "Bacillus PCoA"
+author: "William R. Shoemaker, Jay T. Lennon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+# Setup Work Environment
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/Task2/PoolPopSeq")
+
+# Load dependencies
+require("vegan")
+require("BiodiversityR")
+require("indicspecies")
+require("viridis")
+require("png")
+require("grid")
+#library("scales")
+
+# Source code functions
+source("R/ParEvol.R")
+```
+
+Get m-score matrix for day 100 Bacillus wt and knockout samples
+
+```{r}
+# pop-by-gene matrix
+pop_by_gene <- c("data/gene_by_sample/B_S/sample_by_gene.txt")
+df <- read.table(paste(pop_by_gene, collapse = ''), sep = "\t", header = TRUE, row.names = 1)
+# select samples only from day 100
+df <- df[grep('D100', rownames(df)), ]
+# remove intergenic regions (if they're there)
+df.noInter <- df[,!grepl('.B', colnames(df))]
+
+# gene info dataframe
+gene_path <- c("data/reference_assemblies_task2/reference_assemblies_task2_table/B.txt")
+df.gene <- read.table(paste(gene_path, collapse = ''), sep = " ", header = TRUE, row.names = 1)
+L <- sum(df.gene$Size)
+df.gene$RelSize <- df.gene$Size / L
+# sort df.gene according to column order in df
+df.RelSize <- df.gene[c('RelSize', 'Size')]
+
+df.merge <- merge(df.RelSize, t(df.noInter), by=0, all=TRUE)
+rownames(df.merge) <- df.merge$Row.names
+sizes <- df.merge$Size
+df.merge <- subset(df.merge, select = -c(Row.names, RelSize, Size) )
+df.merge <- t(df.merge)
+
+df.m <- make.m.matrix(df.merge, sizes)
+df.m <- df.m[rowSums(df.m[,-1]) != 0,]
+df.m <- df.m[, colSums(df.m != 0) > 0]
+write.table(df.m, "data/gene_by_sample/B_S/sample_by_gene_m.txt", sep="\t")
+
+```
+
+
+make ordination
+```{r}
+df.m.db <- vegdist(df.m, method = "bray", upper = TRUE, diag = TRUE)
+df.m.pcoa. <- cmdscale(df.m.db, eig = TRUE, k = 2) 
+explainvar1 <- round(df.m.pcoa.$eig[1] / sum(df.m.pcoa.$eig), 3) * 100
+explainvar2 <- round(df.m.pcoa.$eig[2] / sum(df.m.pcoa.$eig), 3) * 100
+#explainvar3 <- round(df.all.pcoa.100$eig[3] / sum(df.all.pcoa.100$eig), 3) * 100
+png(filename = paste(c("figs/pcoa/pcoa_m_D100_B_S.png"), collapse = ''),
+    width = 1200, height = 1200, res = 96*2)
+# Define Plot Parameters
+#par(mar = c(5, 5, 1, 2) + 0.1)
+B_S.D100 <- c()
+for (x in rownames(df.m.pcoa.$points)){
+  if (grepl("B", x)){
+    B_S.D100 <- c(B_S.D100, 19)
+  } else if ( grepl("S", x)) {
+    B_S.D100 <- c(B_S.D100, 1)
+  } 
+}
+par(mar = c(6.5, 6, 1.5, 2.5) + 0.1)
+# Initiate Plot
+
+plot(df.m.pcoa.$points[ ,1], df.m.pcoa.$points[ ,2],  xlim = c(-0.7, 0.7), ylim = c(-0.7, 0.7),
+     xlab = paste("PCoA 1 (", explainvar1, "%)", sep = ""),
+     ylab = paste("PCoA 2 (", explainvar2, "%)", sep = ""),
+     pch = 19, cex = 2.0, type = "n", cex.lab = 1.5, cex.axis = 1.2, axes = FALSE)
+
+# Add Axes
+axis(side = 1, labels = T, lwd.ticks = 2, cex.axis = 1.2, las = 1)
+axis(side = 2, labels = T, lwd.ticks = 2, cex.axis = 1.2, las = 1)
+abline(h = 0, v = 0, lty = 3)
+box(lwd = 2)
+
+# Add Points & Labels
+cols.D100 <- c()
+treats.D100 <- c()
+for (x in rownames(df.m.pcoa.$points)){
+  if (grepl("frequency_L0", x)){
+    treats.D100 <- c(treats.D100, "1")
+    cols.D100 <- c(cols.D100, "#87CEEB")
+  } else if ( grepl("frequency_L1", x)) {
+    treats.D100 <- c(treats.D100, "10")
+    cols.D100 <- c(cols.D100, "#FFA500")
+  } else if (grepl("frequency_L2", x)) {
+    treats.D100 <- c(treats.D100, "100")
+    cols.D100 <- c(cols.D100, "#FF6347")
+  }
+}
+test <- cbind.data.frame(B_S.D100, treats.D100)
+test$merge <- paste(test$B_S.D100, test$treats.D100, sep="_")
+#plot
+points(df.m.pcoa.$points[ ,1], df.m.pcoa.$points[ ,2],
+       pch = B_S.D100, cex = 2.5, bg = "gray", col = cols.D100, lwd  = 3)
+ellipse.cols <- c("#87CEEB", "#FFA500", "#FF6347", "#87CEEB", "#FFA500", "#FF6347")
+ordiellipse(df.m.pcoa., test$merge, conf = 0.95, col = ellipse.cols, lwd=2)
+legend(x=-0.8,y = -1.01, xpd = TRUE, c("1-day","10-day","100-day"), 
+       col=c('#87CEEB','#FFA500','#FF6347'), ncol=3, bty ="n", 
+       pch = c(16,16,16), cex = 1.6, pt.cex = 3.0, text.font = 20)
+dev.off()
+
+# Show Plot
+img <- readPNG(paste(c("figs/pcoa/pcoa_m_D100_B_S.png"), collapse = ''))
+grid.raster(img)
+
+```
+
+PERMANOVA
+
+```{r}
+B_S.D100.category <- c()
+for (x in rownames(df.m)){
+  if (grepl("B", x)){
+    B_S.D100.category <- c(B_S.D100.category, 'B')
+  } else if ( grepl("S", x)) {
+    B_S.D100.category <- c(B_S.D100.category, 'S')
+  } 
+}
+
+treats.D100.perm <- c()
+for (x in rownames(df.m)){
+  if (grepl("frequency_L0", x)){
+    treats.D100.perm <- c(treats.D100.perm, 0)
+  } else if ( grepl("frequency_L1", x)) {
+    treats.D100.perm <- c(treats.D100.perm, 1)
+  } else if (grepl("frequency_L2", x)) {
+    treats.D100.perm <- c(treats.D100.perm, 2)
+  }
+}
+
+
+
+perm <- adonis(df.m ~ B_S.D100.category * treats.D100.perm, method = "bray", permutations = 999)
+perm
+```
+
+
+Run Indicator species analysis
+
+
+```{r}
+# Indicator Value
+# Add Points & Labels
+treats.D100.indval <- c()
+for (x in rownames(df.m)){
+  if (grepl("frequency_L0", x)){
+    treats.D100.indval <- c(treats.D100.indval, "1")
+  } else if ( grepl("frequency_L1", x)) {
+    treats.D100.indval <- c(treats.D100.indval, "10")
+  } else if (grepl("frequency_L2", x)) {
+    treats.D100.indval <- c(treats.D100.indval, "100")
+  }
+}
+
+B_S.D100.indval <- c()
+for (x in rownames(df.m)){
+  if (grepl("B", x)){
+    B_S.D100.indval <- c(B_S.D100.indval, "W")
+  } else if ( grepl("S", x)) {
+    B_S.D100.indval <- c(B_S.D100.indval, "S")
+  } 
+}
+test.indval <- cbind.data.frame(B_S.D100.indval, treats.D100.indval)
+test.indval$merge <- paste(test.indval$B_S.D100, test.indval$treats.D100, sep="_")
+
+indval <- multipatt(as.data.frame(df.m), cluster = test.indval$merge, func = "IndVal.g", control = how(nperm=999)) 
+summary(indval)
+
+
+
+
+```
+
