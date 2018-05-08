@@ -21,6 +21,10 @@ def get_bacillus_mut_rate():
 def get_bacillus_indel_rate():
     return 1.20 * (10**-10)
 
+def get_colors():
+    return {'0':'#87CEEB', '1': '#FFA500', '2':'#FF6347'}
+
+
 def get_ts_tv_dict():
 
     ts_tv_dict = {
