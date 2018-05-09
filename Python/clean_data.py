@@ -113,6 +113,7 @@ def clean_GBK():
                 out_line = [locus_tag, protein_id, gene, f.type, size, GC, chrom, fold_1, fold_2, \
                         fold_2_S, fold_2_V, fold_3, fold_4, N, S]
             else:
+                #m = G + C -> A + T / A + T -> G + C
                 out_line = [locus_tag, protein_id, gene, f.type, size, GC, chrom, 'nan', 'nan', \
                         'nan', 'nan', 'nan', 'nan', 'nan', 'nan']
             #print(locus_tag)
@@ -121,17 +122,17 @@ def clean_GBK():
 
 
 def get_iRep():
-    directory = os.fsencode(bt.get_path() + '/data/pool_pop_seq/rebreseq_sam')
-    fasta = bt.get_path() + '/data/reference.fasta'
+    directory = os.fsencode(bt.get_path() + '/data/bwa_sam_merged')
+    fasta = bt.get_path() + '/data/Bacillus_subtilis_NCIB_3610/GCA_002055965.1_ASM205596v1_genomic.fna'
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
-        if filename.endswith('-300.sam'):
+        if filename.endswith('-100.sam'):
             print(filename)
             out_file = bt.get_path() + '/data/bPTR/' + filename.split('.')[0]
             sam = os.path.join(str(directory, 'utf-8'), filename)
             #plot = bt.get_path() + '/data/bPTR/' + filename.split('.')[0]
             #subprocess.call(['irep', '-f', fasta, '-s', sam, '-o', out_file, '--sort'])
-            subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '--sort', '-plot', out_file])
+            subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '--sort', '-plot', str(out_file)])
 
 
 
@@ -175,5 +176,5 @@ def get_pop_by_gene_matrix():
 
 
 #clean_GBK()
-get_pop_by_gene_matrix()
-#get_iRep()
+#get_pop_by_gene_matrix()
+get_iRep()

@@ -1,0 +1,49 @@
+Group L0B  #sps.  2
+             stat p.value
+B4U62_13610 0.775   0.015 *
+B4U62_17655 0.748   0.005 **
+
+ Group L1B  #sps.  2
+             stat p.value
+B4U62_02480 0.966   0.001 ***
+B4U62_04585 0.894   0.004 **
+
+ Group L1S  #sps.  1
+             stat p.value
+B4U62_05145 0.881   0.001 ***
+
+ Group L2B  #sps.  1
+             stat p.value
+B4U62_00640 0.775   0.016 *
+
+ Group L2S  #sps.  2
+             stat p.value
+B4U62_06330 0.880   0.001 ***
+B4U62_01325 0.775   0.018 *
+
+ Group L0B+L0S  #sps.  2
+             stat p.value
+B4U62_15720 0.913   0.001 ***
+B4U62_18305 0.831   0.002 **
+
+ Group L1S+L2S  #sps.  1
+             stat p.value
+B4U62_00245 0.806   0.004 **
+
+ Group L0B+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_07685 0.802   0.019 *
+
+ Group L0B+L1B+L2B  #sps.  1
+             stat p.value
+B4U62_02485 0.788   0.022 *
+
+ Group L0S+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_07650 0.776   0.033 *
+
+ Group L0B+L0S+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_18310 0.894   0.001 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 

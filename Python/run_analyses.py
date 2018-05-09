@@ -4,6 +4,8 @@ import bacillus_tools as bt
 import numpy as np
 import pandas as pd
 from skbio.diversity import beta_diversity
+import  matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 class likelihood_matrix:
 
@@ -102,13 +104,62 @@ class mut_bias:
         for key, value in AT_GC_dict.items():
             print(key, value)
             key_split = re.split(r'[-_]+', key)
-            out_df.write('\t'.join([key, key_split[1][2], key_split[1][1], key_split[1][3], str(value)]) + '\n')
+            out_df.write('\t'.join([key, key_split[1][2], key_split[1][1], key_split[1][3], key_split[2], str(value)]) + '\n')
         out_df.close()
 
-    #def plot_mut_bias(self):
+    def plot_mut_bias(self):
+        df = pd.read_csv(bt.get_path() + '/data/mut_bias.txt', sep = '\t', header = 'infer', index_col = 0)
+        strains = ['B', 'S']
+        B_1 = df[(df.Strain == 'B') & (df.Treatment == 0)]['m_sample_ma'].tolist()
+        B_10 = df[(df.Strain == 'B') & (df.Treatment == 1)]['m_sample_ma'].tolist()
+        B_100 = df[(df.Strain == 'B') & (df.Treatment == 2)]['m_sample_ma'].tolist()
+        S_1 = df[(df.Strain == 'S') & (df.Treatment == 0)]['m_sample_ma'].tolist()
+        S_10 = df[(df.Strain == 'S') & (df.Treatment == 1)]['m_sample_ma'].tolist()
+        S_100 = df[(df.Strain == 'S') & (df.Treatment == 2)]['m_sample_ma'].tolist()
+        fig, ax = plt.subplots()
+        ax.margins(0.05) # Optional, just adds 5% padding to the autoscaling
+        ax.plot([0]* len(B_1), B_1, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['0'], alpha = 0.9)
+        ax.plot([0.5]* len(S_1), S_1, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['0'], alpha = 0.9, markeredgewidth=2, mfc='none')
+        ax.plot([1.5]* len(B_10), B_10, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['1'], alpha = 0.9)
+        ax.plot([2]* len(S_10), S_10, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['1'], alpha = 0.9, markeredgewidth=2, mfc='none')
+        ax.plot([3]* len(B_100), B_100, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['2'], alpha = 0.9)
+        ax.plot([3.5]* len(S_100), S_100, marker='o', linestyle='', \
+            ms=14, color = bt.get_colors()['2'], alpha = 0.9, markeredgewidth=2, mfc='none')
+        #fig.canvas.draw()
+        ax.text(0, 6.8, r'$m=\frac{\mathrm{G + C} \rightarrow \mathrm{A + T} }{\mathrm{A + T} \rightarrow \mathrm{G + C} }$', fontsize=18)
+        labels = [item.get_text() for item in ax.get_xticklabels()]
+        labels[1] = '        1-Day'
+        labels[4] = '       10-Day'
+        labels[7] = '      100-Day'
+        plt.axhline(y=1, color='grey', linestyle='--', lw = 4)
+        plt.ylim([0,8])
+        ax.set_xticklabels(labels, fontsize = 18)
+        ax.set_ylabel(r'$m_{pop} / m_{Ancestor}$', fontsize = 20)
+
+        legend_elements = [ Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{Wild-type}$',
+                            markerfacecolor='k', markersize=14,),
+                            Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{\Delta spo0A}$',
+                            markerfacecolor='none', markersize=12, markeredgewidth = 2, markeredgecolor = 'k')]
+
+        #legend_elements = [Line2D([0], [0],  marker='o', markerfacecolor='g',color='b',label=r'$\mathrm{Wild-type}$'),
+        #           Line2D([0], [0], marker='o', ms = 14, color='k', label=r'$\mathrm{\Delta spo0A}$',
+        #                 markersize=15)]
+        #plt.ticklabel_format(style='sci', axis='y')
+        ax.legend(handles=legend_elements, loc='upper right',
+                bbox_to_anchor=(0.33, 0.8), frameon=False, prop={'size': 11})
+        #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
+        fig.savefig(bt.get_path() + '/figs/mut.png', bbox_inches='tight',  dpi = 600)
+        plt.close()
 
 
-mut_bias().get_mut_bias()
+
+
+mut_bias().plot_mut_bias()
 
 
 

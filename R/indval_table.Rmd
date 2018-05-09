@@ -4,7 +4,7 @@ output: pdf_document
 
 
 
-|$$\mathbf{Gene}$$|$$\mathbf{Time \textbackslash  \, Strain}$$ |$$\mathbf{IndVal}$$|$$\boldsymbol{p\mbox{-}value}$$|
+|$$\mathbf{Gene}$$|$$\mathbf{Transfer\textendash Time \textbackslash  \, Strain}$$ |$$\mathbf{IndVal}$$|$$\boldsymbol{p\mbox{-}value}$$|
 |:-----------------:|:--------------------:|:----------------:|:---------:|
 |$$\boldsymbol{oppD}$$   |  $$\boldsymbol{\Delta spo0A \textbackslash10}$$   |  $$0.775$$ |   $$0.019$$   |
 |$$\boldsymbol{oppA}$$   |  $$\boldsymbol{\Delta spo0A \textbackslash100}$$   |  $$0.848$$ |   $$0.001$$   |
