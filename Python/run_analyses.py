@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from skbio.diversity import beta_diversity
 import  matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 class likelihood_matrix:
 
@@ -139,7 +140,18 @@ class mut_bias:
         plt.ylim([0,8])
         ax.set_xticklabels(labels, fontsize = 18)
         ax.set_ylabel(r'$m_{pop} / m_{Ancestor}$', fontsize = 20)
+
+        legend_elements = [ Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{Wild-type}$',
+                            markerfacecolor='k', markersize=14,),
+                            Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{\Delta spo0A}$',
+                            markerfacecolor='none', markersize=12, markeredgewidth = 2, markeredgecolor = 'k')]
+
+        #legend_elements = [Line2D([0], [0],  marker='o', markerfacecolor='g',color='b',label=r'$\mathrm{Wild-type}$'),
+        #           Line2D([0], [0], marker='o', ms = 14, color='k', label=r'$\mathrm{\Delta spo0A}$',
+        #                 markersize=15)]
         #plt.ticklabel_format(style='sci', axis='y')
+        ax.legend(handles=legend_elements, loc='upper right',
+                bbox_to_anchor=(0.33, 0.8), frameon=False, prop={'size': 11})
         #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
         fig.savefig(bt.get_path() + '/figs/mut.png', bbox_inches='tight',  dpi = 600)
         plt.close()

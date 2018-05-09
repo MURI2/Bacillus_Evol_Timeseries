@@ -1,0 +1,83 @@
+Group L0B  #sps.  2
+             stat p.value
+B4U62_13610 0.775   0.023 *
+B4U62_17655 0.748   0.007 **
+
+ Group L1B  #sps.  2
+             stat p.value
+B4U62_02480 0.966   0.001 ***
+B4U62_04585 0.894   0.002 **
+
+ Group L1S  #sps.  1
+             stat p.value
+B4U62_05145 0.881   0.001 ***
+
+ Group L2B  #sps.  1
+             stat p.value
+B4U62_00640 0.775   0.013 *
+
+ Group L2S  #sps.  2
+             stat p.value
+B4U62_06330 0.880   0.001 ***
+B4U62_01325 0.775   0.015 *
+
+
+
+
+ Group L0B+L0S  #sps.  2
+             stat p.value
+B4U62_15720 0.913   0.001 ***
+B4U62_18305 0.831   0.002 **
+
+
+
+
+ Group L1S+L2S  #sps.  1
+             stat p.value
+B4U62_00245 0.806   0.005 **
+
+
+
+
+ Group L0B+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_07685 0.802   0.018 *
+
+
+
+
+
+ Group L0B+L1B+L2B  #sps.  1
+             stat p.value
+B4U62_02485 0.788   0.018 *
+
+ Group L0S+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_07650 0.776   0.027 *
+
+ Group L0B+L0S+L1B+L1S  #sps.  1
+             stat p.value
+B4U62_18310 0.894   0.001 ***
+---
+
+
+p{4cm} p{4cm} p{4cm}
+
+
+
+
+
+
+
+1-Day WT             &  &  \\ [1ex]
+10-Day WT             &  &  \\ [1ex]
+100-Day WT             &  &  \\ [1ex]
+10-Day $\Delta$ spo0A          &  &  \\ [1ex]
+100-Day $\Delta$ spo0A     &  oppA & Oligopeptide transport \\ [1ex]
+1-Day WT and $\Delta$ spo0A  & WP_003397971 & Gylycolysis \\ [1ex]
+     &  gpmI &  Sporulation \\ [1ex]
+
+10 and 100-Day $\Delta$ spo0A & abrB  & Sporulation \\ [1ex]
+1 and 10-Day WT, 10-Day $\Delta$ spo0A  & ptsI &  Phosphotransferase\\ [1ex]
+1 and 10-Day $\Delta$ spo0A, 10-Day WT  & zosA & Anti-oxidation \\ [1ex]
+1 and 10-Day WT and $\Delta$ spo0A & tpiA & Gluconeogenesis \\ [1ex]

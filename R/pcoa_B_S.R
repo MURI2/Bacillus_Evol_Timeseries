@@ -12,6 +12,8 @@ for (package in package.list) {
   }
 }
 
+library('indicspecies')
+
 
 ######
 # run PCoA for gene_by_pop containing G scores for all time points

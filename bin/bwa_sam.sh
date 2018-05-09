@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -k o
-#PBS -l nodes=1:ppn=8,vmem=100gb,walltime=24:00:00
+#PBS -l nodes=1:ppn=8,vmem=100gb,walltime=14:00:00
 #PBS -M wrshoema@indiana.edu
 #PBS -m abe
 #PBS -j oe
@@ -18,7 +18,8 @@ bwa index $ref
 samtools faidx $ref
 
 mkdir -p /N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_bam
-mkdir -p /N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_sam_merged
+#mkdir -p /N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_sam_merged
+mkdir -p /N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_bam_merged
 
 #declare -a strains=("B")
 #declare -a treats=("0")
@@ -56,9 +57,9 @@ do
           bwa mem -t 4 $ref $R1 $R2 | samtools view -F 4 -bT $ref - \
             | samtools sort -o $bwa_bam_out
         done
-        bwa_sam_merged_out=/N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_sam_merged/${sample}.sam
+        bwa_bam_merged_out=/N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_bam_merged/${sample}.bam
         samtools merge - /N/dc2/projects/muri2/Task2/PoolPopSeq/data/bwa_bam/${sample}_*.bam \
-        | samtools sort - | samtools view -h -o $bwa_sam_merged_out
+        | samtools sort -o $bwa_bam_merged_out
       done
     done
   done
