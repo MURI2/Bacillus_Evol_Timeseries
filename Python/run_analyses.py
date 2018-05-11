@@ -40,19 +40,47 @@ class likelihood_matrix:
         df_new.to_csv(out_name, sep = '\t', index = True)
 
 
-def pcoa():
-    print('what')
-    # can't use floats, just write your own functions
-    data = [[0.5, 64, 14, 0, 0, 3, 1],
-         [0, 3, 35, 42, 0, 12, 1],
-         [0, 5, 5, 0, 40, 40, 0],
-         [44, 35, 9, 0, 1, 0, 0],
-         [0, 2, 8, 0, 35, 45, 1],
-         [0, 0, 25, 35, 0, 19, 0]]
-    ids = list('ABCDEF')
-    print(beta_diversity("braycurtis", data, ids))
-    #pw_distances(data, ids, "braycurtis")
+def plot_bPTR():
+    df = pd.read_csv(bt.get_path() + '/data/bPTR_clean.txt', sep = '\t', header = 'infer', index_col = 0)
+    strains = ['B', 'S']
+    B_1 = df[(df.Strain == 'B') & (df.Treatment == 0)]['bPTR'].tolist()
+    B_10 = df[(df.Strain == 'B') & (df.Treatment == 1)]['bPTR'].tolist()
+    B_100 = df[(df.Strain == 'B') & (df.Treatment == 2)]['bPTR'].tolist()
+    S_1 = df[(df.Strain == 'S') & (df.Treatment == 0)]['bPTR'].tolist()
+    S_10 = df[(df.Strain == 'S') & (df.Treatment == 1)]['bPTR'].tolist()
+    S_100 = df[(df.Strain == 'S') & (df.Treatment == 2)]['bPTR'].tolist()
+    fig, ax = plt.subplots()
+    ax.margins(0.05) # Optional, just adds 5% padding to the autoscaling
+    ax.plot([0]* len(B_1), B_1, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['0'], alpha = 0.9)
+    ax.plot([0.5]* len(S_1), S_1, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['0'], alpha = 0.9, markeredgewidth=2, mfc='none')
+    ax.plot([1.5]* len(B_10), B_10, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['1'], alpha = 0.9)
+    ax.plot([2]* len(S_10), S_10, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['1'], alpha = 0.9, markeredgewidth=2, mfc='none')
+    ax.plot([3]* len(B_100), B_100, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['2'], alpha = 0.9)
+    ax.plot([3.5]* len(S_100), S_100, marker='o', linestyle='', \
+        ms=14, color = bt.get_colors()['2'], alpha = 0.9, markeredgewidth=2, mfc='none')
+    labels = [item.get_text() for item in ax.get_xticklabels()]
+    labels[1] = '        1-Day'
+    labels[4] = '       10-Day'
+    labels[7] = '      100-Day'
+    #plt.ylim([0,8])
+    ax.set_xticklabels(labels, fontsize = 18)
+    ax.set_ylabel('Peak-to-trough coverage ratio', fontsize = 16)
 
+    legend_elements = [ Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{Wild-type}$',
+                        markerfacecolor='k', markersize=14,),
+                        Line2D([0], [0], marker='o', color='w', label=r'$\mathrm{\Delta spo0A}$',
+                        markerfacecolor='none', markersize=12, markeredgewidth = 2, markeredgecolor = 'k')]
+    #plt.ticklabel_format(style='sci', axis='y')
+    ax.legend(handles=legend_elements, loc='upper right',
+            frameon=False, prop={'size': 11})
+    #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
+    fig.savefig(bt.get_path() + '/figs/bPTR.png', bbox_inches='tight',  dpi = 600)
+    plt.close()
 
 class mut_bias:
 
@@ -159,10 +187,8 @@ class mut_bias:
 
 
 
-mut_bias().plot_mut_bias()
-
-
-
+#mut_bias().plot_mut_bias()
+plot_bPTR()
 #def get_hellinger():
 #pca()
 #likelihood_matrix().get_likelihood_matrix()
