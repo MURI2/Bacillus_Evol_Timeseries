@@ -132,7 +132,7 @@ def get_iRep():
             sam = os.path.join(str(directory, 'utf-8'), filename)
             #plot = bt.get_path() + '/data/bPTR/' + filename.split('.')[0]
             #subprocess.call(['irep', '-f', fasta, '-s', sam, '-o', out_file, '--sort'])
-            subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '--sort', '-plot', str(out_file)])
+            subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '-plot', str(out_file)])
 
 
 
