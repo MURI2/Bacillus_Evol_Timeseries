@@ -137,11 +137,23 @@ def get_bPTR():
 
 def clean_bPTR():
     directory = os.fsencode(bt.get_path() + '/data/bPTR')
+    df_out = open(bt.get_path() + '/data/bPTR_clean.txt', 'w')
+    header = ['Sample', 'Strain', 'Treatment', 'Replicate', 'Time' ,'bPTR']
+    df_out.write('\t'.join(header) + '\n')
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
-        if filename.endswith('.txt'):
+        if filename.endswith('-100.txt'):
             bPTR_path = sam = os.path.join(str(directory, 'utf-8'), filename)
-            print(bPTR_path)
+            for i, line in enumerate(open(bPTR_path, 'r')):
+                if i == 0:
+                    continue
+                f_clean = filename.split('.')[0]
+                f_clean_split = re.split(r'[-_]+', f_clean)
+                out_line = [f_clean, f_clean_split[1][2],  f_clean_split[1][1],
+                            f_clean_split[1][3], f_clean_split[2],  line.split()[-1]]
+                df_out.write('\t'.join(out_line) + '\n')
+                print(f_clean)
+    df_out.close()
 
 def get_pop_by_gene_matrix():
     # just bother with day 100 for now
@@ -184,4 +196,4 @@ def get_pop_by_gene_matrix():
 
 #clean_GBK()
 #get_pop_by_gene_matrix()
-get_iRep()
+clean_bPTR()
