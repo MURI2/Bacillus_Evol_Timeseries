@@ -121,7 +121,7 @@ def clean_GBK():
     df_out.close()
 
 
-def get_iRep():
+def get_bPTR():
     directory = os.fsencode(bt.get_path() + '/data/bwa_sam_merged')
     fasta = bt.get_path() + '/data/Bacillus_subtilis_NCIB_3610/GCA_002055965.1_ASM205596v1_genomic.fna'
     for file in os.listdir(directory):
@@ -135,6 +135,13 @@ def get_iRep():
             subprocess.call(['bPTR', '-m', 'gc_skew', '-f', fasta, '-s', sam, '-o', str(out_file) + '.txt', '-plot', str(out_file)])
 
 
+def clean_bPTR():
+    directory = os.fsencode(bt.get_path() + '/data/bPTR')
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith('.txt'):
+            bPTR_path = sam = os.path.join(str(directory, 'utf-8'), filename)
+            print(bPTR_path)
 
 def get_pop_by_gene_matrix():
     # just bother with day 100 for now
