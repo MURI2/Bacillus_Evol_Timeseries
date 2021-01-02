@@ -7,37 +7,7 @@ from skbio.diversity import beta_diversity
 import  matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-class likelihood_matrix:
 
-    def get_gene_lengths(self):
-        gene_df_path = bt.get_path() + '/data/gene_table.txt'
-        gene_df = pd.read_csv(gene_df_path, sep = '\t', header = 'infer', index_col = 0)
-        length_df = gene_df.loc[:, 'Size']
-        length_df.columns = ['Size']
-        return length_df
-        #return pd.Series(gene_df.Size.values, index=gene_df.index).to_dict()
-
-    def get_likelihood_matrix(self):
-        df_in = bt.get_path() + '/data/pool_pop_seq/gene_by_pop.txt'
-        df = pd.read_csv(df_in, sep = '\t', header = 'infer', index_col = 0)
-        genes = df.columns.tolist()
-        genes_lengths = self.get_gene_lengths().loc[genes]
-        genes_lengths = genes_lengths.reindex(genes)
-        L_mean = np.mean(list(genes_lengths.values))
-        L_i = np.asarray(list(genes_lengths.values))
-        N_genes = len(genes)
-        m_mean = df.sum(axis=1) / N_genes
-        for index, row in df.iterrows():
-            m_mean_j = m_mean[index]
-            delta_j = row * np.log((row * (L_mean / L_i)) / m_mean_j)
-            df.loc[index,:] = delta_j
-        out_name = bt.get_path() + '/data/pool_pop_seq/gene_by_pop_delta.txt'
-        df_new = df.fillna(0)
-        # remove colums with all zeros
-        df_new.loc[:, (df_new != 0).any(axis=0)]
-        # replace negative values with zero
-        df_new[df_new < 0] = 0
-        df_new.to_csv(out_name, sep = '\t', index = True)
 
 
 def plot_bPTR():
@@ -81,6 +51,7 @@ def plot_bPTR():
     #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
     fig.savefig(bt.get_path() + '/figs/bPTR.png', bbox_inches='tight',  dpi = 600)
     plt.close()
+
 
 class mut_bias:
 
@@ -187,8 +158,9 @@ class mut_bias:
 
 
 
+
 #mut_bias().plot_mut_bias()
-plot_bPTR()
+#plot_bPTR()
 #def get_hellinger():
 #pca()
 #likelihood_matrix().get_likelihood_matrix()

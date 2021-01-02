@@ -1,0 +1,3 @@
+Locus tag, RefSeq protein ID, Gene, Length, Observed, Expected, Multiplicity, -log10(P)
+B4U62_RS19670, WP_003227757.1, , 1026.0, 4, 0.02, 2.80, 18.8047
+B4U62_RS14390, WP_003229873.1, , 834.0, 3, 0.02, 2.58, 14.1335
