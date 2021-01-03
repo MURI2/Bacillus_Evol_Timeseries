@@ -8,7 +8,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.colors import ColorConverter
 
 import scipy.stats as stats
-import statsmodels.api as sm
+import statsmodels.stats.multitest as multitest
 
 import parse_file
 import timecourse_utils
@@ -22,9 +22,19 @@ import phik
 np.random.seed(123456789)
 
 
+# to-do: re-do analysis for enriched genes in *either* treatment you're comparing
+# read in nonsignificant genes and add those conts in..
+
+
 permutations_divergence = 10000
 
 treatment_pairs = [['0','1'],['0','2'],['1','2']]
+
+
+gene_data_B = parse_file.parse_gene_list('B')
+gene_names_B, gene_start_positions_B, gene_end_positions_B, promoter_start_positions_B, promoter_end_positions_B, gene_sequences_B, strands_B, genes_B, features_B, protein_ids_B = gene_data_B
+gene_name_dict = dict(zip(gene_names_B, genes_B ))
+protein_id_dict = dict(zip(gene_names_B, protein_ids_B ))
 
 significant_multiplicity_dict = {}
 significant_n_mut_dict = {}
@@ -38,6 +48,7 @@ for taxon in pt.taxa:
     gene_data = parse_file.parse_gene_list(taxon)
 
     gene_names, gene_start_positions, gene_end_positions, promoter_start_positions, promoter_end_positions, gene_sequences, strands, genes, features, protein_ids = gene_data
+
 
     convergence_matrix = parse_file.parse_convergence_matrix(pt.get_path() + '/data/timecourse_final/' +("%s_convergence_matrix.txt" % ('0'+taxon)))
     Ltot = 0
@@ -76,6 +87,10 @@ def calculate_divergence_correlations_between_taxa():
 
     sys.stdout.write("Starting divergence tests...\n")
 
+    output_file = open(pt.get_path() + "/data/divergent_genes_between_taxa.txt", "w")
+    # print header
+    output_file.write(", ".join(["Transfer regime", "Taxon", "Locus tag", "RefSeq protein ID", "Gene", "|Delta relative mult|", "P, BH corrected"]))
+
     divergence_dict = {}
     for treatment_idx, treatment in enumerate(pt.treatments):
         all_genes = set(significant_n_mut_dict['B'].keys()) & significant_n_mut_dict['S'].keys()
@@ -99,6 +114,11 @@ def calculate_divergence_correlations_between_taxa():
         pearsons_corr_squared = pearsons_corr**2
         pearsons_corr_null = []
         pearsons_corr_squared_null = []
+
+        obs_rel_difference = rel_mult_matrix[0,:] - rel_mult_matrix[1,:]
+
+        gene_obs_rel_difference_null_dict = {}
+
         for k in range(permutations_divergence):
 
             if (k % 2000 == 0) and (k>0):
@@ -113,6 +133,42 @@ def calculate_divergence_correlations_between_taxa():
 
             pearsons_corr_null.append(pearsons_corr_random)
             pearsons_corr_squared_null.append(pearsons_corr_squared_random)
+
+            obs_rel_difference_null = rel_mult_matrix_random[0,:] - rel_mult_matrix_random[1,:]
+            for gene_name_i, obs_rel_difference_null_i in zip(gene_names, obs_rel_difference_null):
+                if gene_name_i not in gene_obs_rel_difference_null_dict:
+                    gene_obs_rel_difference_null_dict[gene_name_i] = []
+                gene_obs_rel_difference_null_dict[gene_name_i].append(obs_rel_difference_null_i)
+
+        p_value_list = []
+        for gene_name_i, obs_rel_difference_i in zip(gene_names, obs_rel_difference):
+            obs_rel_difference_abs_i = np.absolute(obs_rel_difference_i)
+            obs_rel_difference_null_array_i = np.asarray(gene_obs_rel_difference_null_dict[gene_name_i])
+            obs_rel_difference_null_array_abs_i = np.absolute(obs_rel_difference_null_array_i)
+            p_value_i = (len(obs_rel_difference_null_array_abs_i[obs_rel_difference_null_array_abs_i>obs_rel_difference_abs_i]) +1) / (permutations_divergence+1)
+            p_value_list.append(p_value_i)
+
+        reject, pvals_corrected, alphacSidak, alphacBonf = multitest.multipletests(p_value_list, alpha=0.05, method='fdr_bh')
+        for gene_name_i_idx, gene_name_i in enumerate(gene_names):
+
+            obs_rel_difference_i = obs_rel_difference[gene_name_i_idx]
+            p_value_bh_i = pvals_corrected[gene_name_i_idx]
+
+            if p_value_bh_i>=0.05:
+                continue
+
+            print(gene_name_i, obs_rel_difference_i, p_value_bh_i)
+
+            if obs_rel_difference_i > 0:
+                taxon_i = 'B'
+            else:
+                taxon_i = 'S'
+
+            obs_rel_difference_abs_i = np.absolute(obs_rel_difference_i)
+
+            output_file.write("\n")
+            output_file.write("%d, %s, %s, %s, %s, %f, %f" % (int(10**int(treatment)), taxon_i, gene_name_i, protein_id_dict[gene_name_i], gene_name_dict[gene_name_i], obs_rel_difference_abs_i, p_value_bh_i))
+
 
         pearsons_corr_null = np.asarray(pearsons_corr_null)
         pearsons_corr_squared_null = np.asarray(pearsons_corr_squared_null)
@@ -139,6 +195,9 @@ def calculate_divergence_correlations_between_taxa():
         sys.stdout.write("%d-day, WT vs. spo0A: rho=%f, P=%f, Z=%f\n" % (10**int(treatment), pearsons_corr, P_corr, Z_corr))
 
     sys.stdout.write("Dumping pickle......\n")
+
+    sys.stdout.write("Saving divergent genes......\n")
+    output_file.close()
     with open(pt.get_path()+'/data/divergence_pearsons_between_taxa.pickle', 'wb') as handle:
         pickle.dump(divergence_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
     sys.stdout.write("Done!\n")
@@ -306,7 +365,7 @@ for taxon in pt.taxa:
 
 ax_between_treatments.set_xticks([0, 1, 2, 3, 4, 5])
 
-ax_between_treatments.set_xticklabels(['1-day vs.\n10-days', '1-day vs.\n100-days', '1-day vs.\n100-days', '1-day vs.\n10-days', '1-day vs.\n100-days', '1-day vs.\n100-days'], fontweight='bold', fontsize=13 )
+ax_between_treatments.set_xticklabels(['1-day vs.\n10-days', '1-day vs.\n100-days', '10-days vs.\n100-days', '1-day vs.\n10-days', '1-day vs.\n100-days', '10-days vs.\n100-days'], fontweight='bold', fontsize=13 )
 
 
 
