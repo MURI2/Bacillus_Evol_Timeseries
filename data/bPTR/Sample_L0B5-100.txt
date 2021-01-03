@@ -1,2 +1,0 @@
-# genome	ORI	TER	/Users/WRShoemaker/GitHub/Bacillus_Evol_Timeseries/data/bwa_sam_merged/Sample_L0B5-100.sam
-/Users/WRShoemaker/GitHub/Bacillus_Evol_Timeseries/data/Bacillus_subtilis_NCIB_3610/GCA_002055965.1_ASM205596v1_genomic.fna	4,242,480	1,942,720	2.611358207026417
