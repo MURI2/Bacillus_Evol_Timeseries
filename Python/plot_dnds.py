@@ -190,6 +190,6 @@ ax.legend(handles=legend_elements, loc='upper right')
 
 
 fig.subplots_adjust(hspace=0.3, wspace=0.5)
-fig_name = pt.get_path() + '/figs/plot_dn_ds.pdf'
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/plot_dn_ds.jpg'
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

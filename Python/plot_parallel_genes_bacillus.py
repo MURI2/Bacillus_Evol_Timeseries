@@ -11,6 +11,26 @@ import scipy.stats as stats
 import numpy as np
 
 
+locus_tag_to_gene_names_dict = {'B4U62_RS01025':'ybaR', 'B4U62_RS02515':'gsiB', 'B4U62_RS19435':'cotG',
+                                'B4U62_RS12450':'prsW', 'B4U62_RS19425':'cotB', 'B4U62_RS20770':'licR',
+                                'B4U62_RS03535':'gutR', 'B4U62_RS19670':'amtB', 'B4U62_RS13310':'tasA',
+                                'B4U62_RS09375':'ymzB', 'B4U62_RS13605':'cccA', 'B4U62_RS19890':'ywlG',
+                                'B4U62_RS09525': 'ynaE', 'B4U62_RS14040':'yqbO', 'B4U62_RS15845':'ytkK',
+                                'B4U62_RS16990':'yugH', 'B4U62_RS20445':'ywdF', 'B4U62_RS09170':'gntR',
+                                'B4U62_RS08200':'ctaD', 'B4U62_RS04630':'yfiI', 'B4U62_RS02595':'ydbP',
+                                'B4U62_RS00030':'gyrB', 'B4U62_RS02075':'yitT', 'B4U62_RS02485':'Hyp. protein',
+                                'B4U62_RS18220':'yvaV', 'B4U62_RS19005':'yitT', 'B4U62_RS02480':'ydaP',
+                                'B4U62_RS02760':'tRNA-Leu', 'B4U62_RS20050':'ywjA', 'B4U62_RS12375':'yphF',
+                                'B4U62_RS16140':'pbuO', 'B4U62_RS01315':'glpQA', 'B4U62_RS04255':'yfmC',
+                                'B4U62_RS16770':'floT', 'B4U62_RS04815':'sspE', 'B4U62_RS11410':'yonX',
+                                'B4U62_RS14390':'czcD', 'B4U62_RS22425':'zpcV', 'B4U62_RS14285':'yrkJ',
+                                'B4U62_RS00375':'yabR', 'B4U62_RS00860':'rpsM', 'B4U62_RS06330':'oppA',
+                                'B4U62_RS16075':'ytoP', 'B4U62_RS17990':'fhuB', 'B4U62_RS04045':'lplB',
+                                'B4U62_RS04070':'yetH', 'B4U62_RS05070':'yhbE', 'B4U62_RS22025':'yyaE',
+                                'B4U62_RS20475':'sacA', 'B4U62_RS01080':'murR', 'B4U62_RS02290':'mtlA',
+                                'B4U62_RS03305':'ydhK', 'B4U62_RS18195':'yvaQ', 'B4U62_RS17475':'yunD'}
+
+
 taxa = [ 'B', 'S']
 #treatments=pt.treatments
 treatments = ['0', '1', '2']
@@ -137,12 +157,23 @@ fig, ax = plt.subplots(figsize=(2,7))
 
 data = np.asarray(gene_values)
 
+print(gene_names)
+
+gene_names_formatted = []
+
+for gene_name in gene_names:
+
+    if gene_name in locus_tag_to_gene_names_dict:
+        gene_names_formatted.append(locus_tag_to_gene_names_dict[gene_name])
+    else:
+        gene_names_formatted.append(gene_name)
+
 
 ax.xaxis.tick_top()
 ax.set_xticks(np.arange(data.shape[1])+0.5, minor=False)
 ax.set_yticks(np.arange(data.shape[0])+0.5, minor=False)
 
-ax.set_yticklabels(gene_names, minor=False, fontsize=5)
+ax.set_yticklabels(gene_names_formatted, minor=False, fontsize=5, fontstyle='italic')
 ax.set_xticklabels([ r'$\mathrm{WT}$', r'$\Delta spo0A$']*3, minor=False, fontsize=5.5)
 
 
@@ -187,5 +218,5 @@ cmap, norm = colors.from_levels_and_colors(intervals,cols_rgb)
 
 plt.pcolor(data,cmap = cmap, norm = norm, edgecolors='k', linewidths=1.5)
 
-fig.savefig(pt.get_path() + '/figs/genes_table.pdf', format= 'pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig.savefig(pt.get_path() + '/figs/genes_table.jpg', format= 'jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

@@ -5,6 +5,7 @@ import numpy as np
 import  matplotlib.pyplot as plt
 from matplotlib.colors import ColorConverter
 from matplotlib_venn import venn2, venn2_circles, venn3, venn3_circles
+from matplotlib.lines import Line2D
 
 import scipy.stats as stats
 
@@ -19,7 +20,8 @@ taxa = ['B', 'S']
 parallelism_axes = {}
 
 
-fig = plt.figure(figsize = (12, 12))
+#fig = plt.figure(figsize = (12, 12))
+fig = plt.figure(figsize = (12, 8))
 
 gene_data = parse_file.parse_gene_list('B')
 
@@ -28,13 +30,15 @@ gene_names, gene_start_positions, gene_end_positions, promoter_start_positions, 
 
 for treatment_idx, treatment in enumerate(pt.treatments):
 
-    ax_multiplicity = plt.subplot2grid((3, 3), (0, treatment_idx), colspan=1)
-    ax_regression = plt.subplot2grid((3, 3), (1, treatment_idx), colspan=1)
-    ax_venn = plt.subplot2grid((3, 3), (2, treatment_idx), colspan=1)
+    ax_multiplicity = plt.subplot2grid((2, 3), (0, treatment_idx), colspan=1)
+    ax_regression = plt.subplot2grid((2, 3), (1, treatment_idx), colspan=1)
+    #ax_venn = plt.subplot2grid((3, 3), (2, treatment_idx), colspan=1)
 
     ax_multiplicity.set_xlabel('Gene multiplicity, ' + r'$m$', fontsize=14)
     ax_multiplicity.set_ylabel('Fraction mutations ' + r'$\geq m$', fontsize=14)
-    ax_multiplicity.set_title( str(10**int(treatment))+ '-day transfers', fontsize=17)
+    ax_multiplicity.set_title( pt.treatment_label_dict[treatment], fontsize=17,  fontweight='bold')
+
+
 
     ax_multiplicity.set_xscale('log', base=10)
     ax_multiplicity.set_yscale('log', base=10)
@@ -52,8 +56,8 @@ for treatment_idx, treatment in enumerate(pt.treatments):
     ax_regression.text(-0.1, 1.07, pt.sub_plot_labels[3+treatment_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_regression.transAxes)
 
 
-    ax_venn.axis('off')
-    ax_venn.text(-0.1, 1.07, pt.sub_plot_labels[6+treatment_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_venn.transAxes)
+    #ax_venn.axis('off')
+    #ax_venn.text(-0.1, 1.07, pt.sub_plot_labels[6+treatment_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_venn.transAxes)
 
 
     mult_taxa_dict = {}
@@ -152,6 +156,10 @@ for treatment_idx, treatment in enumerate(pt.treatments):
     if treatment_idx == 0:
         ax_multiplicity.legend( loc='lower left', fontsize=8)
 
+        legend_elements = [Line2D([0], [0], marker='o', color='none',  label= 'Enriched in both strains', markerfacecolor='w', markersize=10, markeredgewidth=3)]
+
+        ax_regression.legend(handles=legend_elements, loc='upper left', fontsize=8)
+
     for gene_name, gene_dict in mult_taxa_dict.items():
         if 'B' not in gene_dict:
             mult_taxa_dict[gene_name]['B'] = 0
@@ -229,20 +237,20 @@ for treatment_idx, treatment in enumerate(pt.treatments):
     #    ax_regression.text(0.1, 0.9, r'$\beta_{1} = $' + str(round(slope, 3)), fontsize=11, transform=ax_regression.transAxes)
     #    ax_regression.text(0.1, 0.8, r'$P \nless 0.05$', fontsize=11, transform=ax_regression.transAxes)
 
-    venn = venn2(subsets = (len(parallel_genes_B_list), len(parallel_genes_S_list), len(set(parallel_genes_B_list) & set(parallel_genes_S_list))), ax=ax_venn, set_labels=('', ''), set_colors=(pt.get_colors(treatment), pt.get_colors(treatment)))
-    c = venn2_circles(subsets=(len(parallel_genes_B_list), len(parallel_genes_S_list), len(set(parallel_genes_B_list) & set(parallel_genes_S_list))), ax=ax_venn, linestyle='dashed')
+    #venn = venn2(subsets = (len(parallel_genes_B_list), len(parallel_genes_S_list), len(set(parallel_genes_B_list) & set(parallel_genes_S_list))), ax=ax_venn, set_labels=('', ''), set_colors=(pt.get_colors(treatment), pt.get_colors(treatment)))
+    #c = venn2_circles(subsets=(len(parallel_genes_B_list), len(parallel_genes_S_list), len(set(parallel_genes_B_list) & set(parallel_genes_S_list))), ax=ax_venn, linestyle='dashed')
     #set_colors=(pt.get_colors(treatment), pt.get_colors(treatment)),
 
-    c[0].set_ls('--')
-    c[1].set_ls(':')
-    c[0].set_lw(5)
-    c[1].set_lw(5)
-    c[0].set_edgecolor(pt.get_colors(treatment))
-    c[1].set_edgecolor(pt.get_colors(treatment))
+    #c[0].set_ls('--')
+    #c[1].set_ls(':')
+    #c[0].set_lw(5)
+    #c[1].set_lw(5)
+    #c[0].set_edgecolor(pt.get_colors(treatment))
+    #c[1].set_edgecolor(pt.get_colors(treatment))
     #c[0].set_radius(len(parallel_genes_B_list) / 80 )
     #c[1].set_radius(len(parallel_genes_S_list) / 80)
 
 fig.subplots_adjust(hspace=0.3, wspace=0.5)
-fig_name = pt.get_path() + '/figs/multiplicity_B_vs_S.pdf'
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/multiplicity_B_vs_S.jpg'
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

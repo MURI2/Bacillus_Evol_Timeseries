@@ -119,6 +119,6 @@ legend_elements = [Line2D([0], [0], color = 'none', marker='o', label=pt.latex_d
 plt.legend(handles=legend_elements, loc='upper left')
 
 fig.subplots_adjust() #hspace=0.3, wspace=0.5
-fig_name = pt.get_path() + "/figs/G_score_subsample.pdf"
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + "/figs/G_score_subsample.jpg"
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

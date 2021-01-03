@@ -386,8 +386,8 @@ ax_between_treatments.text(0.75, -0.155, "B. subtilis "  + r'$\mathbf{\Delta spo
 
 
 fig.subplots_adjust(hspace=0.15,wspace=0.2) #hspace=0.3, wspace=0.5
-fig_name = pt.get_path() + "/figs/divergence.pdf"
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + "/figs/divergence.jpg"
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
 
 

@@ -292,8 +292,8 @@ def plot_within_taxon_paralleliism(taxon, slope_null=1):
     fig.suptitle(pt.latex_dict[taxon], fontsize=30)
 
     fig.subplots_adjust(wspace=0.3) #hspace=0.3, wspace=0.5
-    fig_name = pt.get_path() + "/figs/multiplicity_%s.pdf" % taxon
-    fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+    fig_name = pt.get_path() + "/figs/multiplicity_%s.jpg" % taxon
+    fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
 

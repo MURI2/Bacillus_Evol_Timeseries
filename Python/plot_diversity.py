@@ -1,6 +1,5 @@
 from __future__ import division
 import os, sys, json, math, itertools
-import pandas as pd
 import numpy as np
 
 import  matplotlib.pyplot as plt
@@ -216,9 +215,11 @@ for treatment_idx, treatment in enumerate(treatments):
         formatted_parameter_K = format_parameter(taxon, 'K', K, ses_K, sig_figs=3)
         formatted_parameter_V_max = format_parameter(taxon, 'V_max', V_max, ses_V_max, sig_figs=3)
 
-        ax_t_vs_M.text(position_dict[treatment][taxon]['K'][0], position_dict[treatment][taxon]['K'][1], formatted_parameter_K, fontsize=6, transform=ax_t_vs_M.transAxes)
-        ax_t_vs_M.text(position_dict[treatment][taxon]['V'][0], position_dict[treatment][taxon]['V'][1], formatted_parameter_V_max, fontsize=6, transform=ax_t_vs_M.transAxes)
+        #ax_t_vs_M.text(position_dict[treatment][taxon]['K'][0], position_dict[treatment][taxon]['K'][1], formatted_parameter_K, fontsize=6, transform=ax_t_vs_M.transAxes)
+        #ax_t_vs_M.text(position_dict[treatment][taxon]['V'][0], position_dict[treatment][taxon]['V'][1], formatted_parameter_V_max, fontsize=6, transform=ax_t_vs_M.transAxes)
 
+        print(treatment, taxon, 'K',  K, '+/-', ses_K)
+        print(treatment, taxon, 'V_max',  V_max, '+/-', ses_V_max)
 
     ax_t_vs_M.set_ylim([0.53 , 800])
     ax_t_vs_M.set_yscale('log', base=10)
@@ -473,8 +474,8 @@ ins_ks.axhline(y=0, color='k', linestyle=':', alpha = 0.8, zorder=1)
 #fig.text(0.53, 0.02, 'Days, ' + r'$t$', ha='center', fontsize=28)
 
 fig.subplots_adjust(hspace=0.65,wspace=0.4) #hspace=0.3, wspace=0.5
-fig_name = pt.get_path() + '/figs/diversity.pdf'
-fig.savefig(fig_name, format='pdf',  bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/diversity.jpg'
+fig.savefig(fig_name, format='jpg',  bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
 
 

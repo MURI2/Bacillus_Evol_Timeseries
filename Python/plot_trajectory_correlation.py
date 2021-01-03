@@ -283,13 +283,13 @@ for analysis, analysis_ax,  in zip(analyses, axes):
         analysis_ax.legend(handles=legend_elements_taxon, loc='upper right', fontsize=6)
 
     if count == 1:
-        analysis_ax.axv line(x=1, color='k', linestyle=':', alpha = 0.8, zorder=1)
+        analysis_ax.axvline(x=1, color='k', linestyle=':', alpha = 0.8, zorder=1)
 
 
     count+=1
 
 
-fig_name = pt.get_path() + '/figs/r2_B_S.pdf'
+fig_name = pt.get_path() + '/figs/r2_B_S.jpg'
 fig.subplots_adjust(hspace=0.45)
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

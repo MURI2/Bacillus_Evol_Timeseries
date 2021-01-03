@@ -149,6 +149,6 @@ for treatment in treatments:
 fig.text(0.53, 0.02, 'Days, ' + r'$t$', ha='center', fontsize=28)
 
 
-fig_name = pt.get_path() + '/figs/mutation_accumulation_B_S.pdf'
-fig.savefig(fig_name, format='pdf',  bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/mutation_accumulation_B_S.jpg'
+fig.savefig(fig_name, format='jpg',  bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

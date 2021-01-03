@@ -85,6 +85,6 @@ plt.legend(numpoints=1, prop={'size':8},  loc='lower right', frameon=False)
 
 plt.title(pt.latex_dict['B'], fontsize=14)
 
-fig_name = pt.get_path() + '/figs/spore_assay.pdf'
-fig.savefig(fig_name, format= 'pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/spore_assay.jpg'
+fig.savefig(fig_name, format= 'jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

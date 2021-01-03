@@ -50,7 +50,6 @@ def cfus_ml(column, conc):
     return column * (10 ** (int(conc) * -1))
 
 
-print(df)
 df_keep = df.iloc[rows_to_keep]
 df_keep.WT = df_keep.WT.astype(int)
 df_keep.spoA = df_keep.spoA.astype(int)
@@ -116,6 +115,6 @@ ax_time_relative.text(-0.1, 1.07, pt.sub_plot_labels[1], fontsize=10, fontweight
 
 ax_time_relative.set_xlabel('Days, ' + r'$t$', fontsize = 20)
 
-fig_name = pt.get_path() + '/figs/fitness_spo0a.pdf'
-fig.savefig(fig_name, format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig_name = pt.get_path() + '/figs/fitness_spo0a.jpg'
+fig.savefig(fig_name, format='jpg', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
